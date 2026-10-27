@@ -19,3 +19,19 @@ nothing to a device. Publishing the draft is a separate maintainer action.
 Shared workflows and community templates live in this repository. Consumer
 workflows pin a reviewed commit. The product repositories keep their own builds
 and tests. Existing failure/recovery alerts remain enabled.
+
+## Dependency maintenance and Raspberry Pi OS Lite
+
+The deployment target remains 64-bit Raspberry Pi OS Lite. Runtime repositories
+require native ARM64 Linux checks alongside x86 checks, using the pinned Rust
+toolchain and locked dependencies. Console default builds remain terminal-only;
+the optional native graphics feature is checked separately. Hosted Ubuntu ARM64
+is a portability check, not qualification of Raspberry Pi OS packages, audio/MIDI
+hardware, display readability or realtime performance. No CI job deploys to a Pi.
+
+Agents handle dependency review batches: inspect exact changes and upstream
+compatibility, require current Required CI, merge compatible updates, and close
+superseded or incompatible update proposals with the reason on the PR. Breaking
+API migrations remain deliberate work; a green x86 job alone is insufficient.
+Keep maintainer review, code owners and required checks enabled. Mark only handled
+GigPies notification threads done; preserve unrelated notifications.
