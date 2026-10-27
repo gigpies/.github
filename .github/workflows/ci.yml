@@ -12,14 +12,23 @@ concurrency:
 jobs:
   automation:
     uses: ./.github/workflows/quality.yml
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: python3 tests/test_release_gate.py
   gate:
     name: Required CI
     if: ${{ always() }}
-    needs: [automation]
+    needs: [automation, tests]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - name: Require contributor checks
         env:
           RESULT: ${{ needs.automation.result }}
-        run: test "$RESULT" = success
+          TEST_RESULT: ${{ needs.tests.result }}
+        run: test "$RESULT" = success && test "$TEST_RESULT" = success
