@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  automation:
+    uses: ./.github/workflows/quality.yml
+  gate:
+    name: Required CI
+    if: ${{ always() }}
+    needs: [automation]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require contributor checks
+        env:
+          RESULT: ${{ needs.automation.result }}
+        run: test "$RESULT" = success

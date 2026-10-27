@@ -1,5 +1,9 @@
-# GigPies organization profile
+# GigPies organization
 
-Public organization overview: [profile/README.md](profile/README.md).
-Product documentation belongs in [GigPies](https://github.com/gigpies/gigpies).
-Keep this profile short, visual and linked to the owning guides.
+- [Public profile](profile/README.md)
+- [Contributor guide](CONTRIBUTING.md)
+- [Security reporting](SECURITY.md)
+- [Checks and draft releases](AUTOMATION.md)
+
+This repository owns the organization overview, shared contributor templates and
+reusable Actions. Product instructions live in [GigPies](https://github.com/gigpies/gigpies).

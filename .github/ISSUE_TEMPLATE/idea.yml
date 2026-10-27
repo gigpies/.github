@@ -1,0 +1,16 @@
+name: Feature idea
+description: Propose a focused improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What would you like to do?
+      description: Describe the musical or operating task and what gets in your way.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested behavior
+      description: A short example is enough. Technical design is optional.

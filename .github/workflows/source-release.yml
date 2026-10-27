@@ -1,0 +1,43 @@
+name: Draft source release
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Existing version tag with successful main CI
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  draft:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Verify existing tag and passing CI; prepare draft
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == refs/heads/main ]] || { echo 'Run this workflow from main.'; exit 1; }
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-+][A-Za-z0-9.-]+)?$ ]] || { echo 'Use a version tag such as v0.2.3.'; exit 1; }
+          object=$(gh api "repos/$GH_REPO/git/ref/tags/$RELEASE_TAG")
+          type=$(jq -r '.object.type' <<< "$object")
+          sha=$(jq -r '.object.sha' <<< "$object")
+          for _ in {1..10}; do
+            [[ "$type" == tag ]] || break
+            object=$(gh api "repos/$GH_REPO/git/tags/$sha")
+            type=$(jq -r '.object.type' <<< "$object")
+            sha=$(jq -r '.object.sha' <<< "$object")
+          done
+          [[ "$type" == commit && "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'Tag does not resolve to a commit.'; exit 1; }
+          relation=$(gh api "repos/$GH_REPO/compare/$sha...main" --jq .status)
+          [[ "$relation" == identical || "$relation" == ahead ]] || { echo 'Tag must belong to main history.'; exit 1; }
+          passed=$(gh api "repos/$GH_REPO/actions/workflows/ci.yml/runs?head_sha=$sha&event=push&status=success&per_page=100" \
+            --jq '[.workflow_runs[] | select(.head_branch == "main")] | length')
+          (( passed > 0 )) || { echo 'No successful main CI run for this exact commit.'; exit 1; }
+          gh release create "$RELEASE_TAG" --verify-tag --draft --generate-notes

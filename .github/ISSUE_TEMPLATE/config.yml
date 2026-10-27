@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Operating guides
+    url: https://github.com/gigpies/gigpies/blob/main/docs/README.md
+    about: Screens, controls and current limitations.
